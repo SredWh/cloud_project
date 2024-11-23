@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To Do List - 登入</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+TC:300,700|Raleway&display=swap">
+  <style>
+    /***----BASIC----***/
+    body {
+      font-family: 'Raleway', 'Noto Sans TC', sans-serif;
+      background: #F5F5DC; /* 淺咖啡色 */
+      height: 100vh;
+      font-weight: 300;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .main {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: center;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px 30px;
+    }
+
+    /***----Title Style----***/
+    .header {
+      color: #4E342E; /* 深咖啡色 */
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 2.5rem; /* 標題字體 */
+      letter-spacing: 2px;
+    }
+
+    /***----Form Style----***/
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-group label {
+      font-size: 1.2rem;
+      color: #4E342E; /* 深咖啡色 */
+      margin-bottom: 8px;
+      display: block;
+    }
+    .form-group input {
+      width: 100%;
+      height: 45px;
+      border-radius: 25px;
+      padding: 0 15px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #8D6E63;
+    }
+
+    .btn-login {
+      width: 100%;
+      height: 45px;
+      background: #8D6E63; /* 深咖啡色 */
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .btn-login:hover {
+      background: #6D4C41;
+    }
+
+    .btn-register {
+      width: 100%;
+      height: 45px;
+      margin-top: 10px;
+      background: #4E342E; /* 深咖啡色 */
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .btn-register:hover {
+      background: #3E2723;
+    }
+
+    /* 錯誤訊息樣式 */
+    .error-message {
+      color: red;
+      font-size: 1.2rem;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="header">To Do List</div>
+    <form id="login-form"onsubmit="login(event)">
+      <div class="form-group">
+        <label for="username">帳號</label>
+        <input type="text" id="username" name="username" placeholder="請輸入您的帳號" required>
+      </div>
+      <div class="form-group">
+        <label for="password">密碼</label>
+        <input type="password" id="password" name="password" placeholder="請輸入您的密碼" required>
+      </div>
+      <button type="submit" class="btn-login">登入</button>
+    </form>
+    <div id="error-message" class="error-message"></div> <!-- 顯示錯誤訊息 -->
+    <button class="btn-register" onclick="register()">註冊</button>
+  </div>
+
+  <script>
+    // 模擬註冊功能
+    function register() {
+      window.location.href = "register.html"; // 跳轉到註冊頁面
+    }
+
+    // 登入功能
+    function login(event) {
+      event.preventDefault(); // 防止表單提交後頁面重載
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      // 發送登入請求
+      fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem('user_id', data.user_id);
+          window.location.href = "../dashboard/dashboard.html"; // 登入成功後，跳轉到主頁
+        } else {
+          // 顯示錯誤訊息
+          document.getElementById('error-message').innerText = data.message;
+        }
+      })
+      .catch(error => {
+        console.error('錯誤:', error);
+        document.getElementById('error-message').innerText = '系統錯誤，請稍後再試';
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To Do List</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+TC:300,700|Raleway&display=swap">
+</head>
+<body>
+  <div class="logout-container">
+    <button class="logout-btn" onclick="logout()">登出</button>
+  </div>
+  <div class="main">
+    <div class="header">To Do List</div>
+    <div class="addList">
+      <input type="text" id="newItem" placeholder="新增待辦事項">
+      <input type="date" id="newDate">
+      <button class="btn-addNew" onclick="addItem(event)">+</button>
+      <div class="error-message" id="error-message" style="display:none;"></div> <!-- 用於顯示錯誤訊息 -->
+    </div>
+    <ul class="listTo" id="todoList">
+      <!-- 待辦事項會顯示在這裡 -->
+    </ul>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    // 頁面加載時，從 localStorage 獲取 user_id 並發送請求顯示待辦事項
+    document.addEventListener("DOMContentLoaded", function() {
+      const user_id = localStorage.getItem('user_id');
+
+      if (!user_id) {
+        alert('請先登入');
+        return;
+      }
+
+      // 發送請求顯示代辦事項
+      fetch('http://localhost:3000/api/show_item', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id }),
+        credentials: 'include'  // 確保攜帶 cookies
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayItems(data.items);
+        } else {
+          document.getElementById('todoList').innerHTML = '<li>沒有待辦事項</li>';
+        }
+      })
+      .catch(error => {
+        console.error('錯誤:', error);
+        document.getElementById('todoList').innerHTML = '<li>無法載入待辦事項，請稍後再試。</li>';
+      });
+    });
+    function logout() {
+      localStorage.removeItem('user_id'); // 清除使用者 ID
+      alert('您已成功登出');
+      window.location.href = '../login/login.html'; // 導向登入頁面
+    }
+
+    // 顯示代辦事項並新增刪除按鈕
+    function displayItems(items) {
+      const todoList = document.getElementById('todoList');
+      todoList.innerHTML = '';  // 清空現有的項目
+
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.item} - ${item.create_date}`;
+        
+        // 創建刪除按鈕
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '刪除';
+        deleteBtn.style.marginLeft = '10px';
+        deleteBtn.onclick = () => deleteItem(item.t_d_id); // 傳入 item 的 id
+        li.appendChild(deleteBtn);
+
+        todoList.appendChild(li);
+      });
+    }
+
+    // 刪除代辦事項
+    function deleteItem(itemId) {
+      const user_id = localStorage.getItem('user_id');
+      if (!user_id) {
+        alert('請先登入');
+        return;
+      }
+
+      fetch('http://localhost:3000/api/delete_item', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ item_id: itemId, user_id }),
+        credentials: 'include'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('待辦事項已刪除');
+          window.location.reload(); // 刪除成功後重新加載頁面
+        } else {
+          alert('刪除失敗，請稍後再試');
+        }
+      })
+      .catch(error => {
+        console.error('錯誤:', error);
+        alert('系統錯誤，請稍後再試');
+      });
+    }
+
+    // 新增事項
+    function addItem(event) {
+      event.preventDefault();
+      const new_item = document.getElementById('newItem').value;
+      const new_date = document.getElementById('newDate').value;
+      const user_id = localStorage.getItem('user_id');
+
+      if (!user_id) {
+        alert('請先登入');
+        return;
+      }
+
+      if (!new_item || !new_date) {
+        document.getElementById('error-message').innerText = '請填寫所有欄位';
+        document.getElementById('error-message').style.display = 'block';
+        return;
+      }
+
+      fetch('http://localhost:3000/api/add_item', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ new_item, new_date, user_id }),
+        credentials: 'include'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('待辦事項已新增');
+          window.location.reload(); // 重新加載頁面以顯示新的代辦事項
+        } else {
+          document.getElementById('error-message').innerText = data.message;
+          document.getElementById('error-message').style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('錯誤:', error);
+        document.getElementById('error-message').innerText = '系統錯誤，請稍後再試';
+        document.getElementById('error-message').style.display = 'block';
+      });
+    }
+  </script>
+</body>
+</html>

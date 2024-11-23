@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To Do List - 註冊</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+TC:300,700|Raleway&display=swap">
+  <style>
+    /***----BASIC----***/
+    body {
+      font-family: 'Raleway', 'Noto Sans TC', sans-serif;
+      background: #F5F5DC; /* 淺咖啡色 */
+      height: 100vh;
+      font-weight: 300;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .main {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: center;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px 30px;
+    }
+
+    /***----Title Style----***/
+    .header {
+      color: #4E342E; /* 深咖啡色 */
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 2.5rem; /* 標題字體 */
+      letter-spacing: 2px;
+    }
+
+    /***----Form Style----***/
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-group label {
+      font-size: 1.2rem;
+      color: #4E342E; /* 深咖啡色 */
+      margin-bottom: 8px;
+      display: block;
+    }
+    .form-group input {
+      width: 100%;
+      height: 45px;
+      border-radius: 25px;
+      padding: 0 15px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #8D6E63;
+    }
+
+    .btn-register {
+      width: 100%;
+      height: 45px;
+      background: #8D6E63; /* 深咖啡色 */
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .btn-register:hover {
+      background: #6D4C41;
+    }
+
+    .error-message {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="header">註冊帳號</div>
+    <form id="register-form">
+      <div class="form-group">
+        <label for="newUsername">帳號</label>
+        <input type="text" id="newUsername" name="username" placeholder="請輸入新帳號" required>
+      </div>
+      <div class="form-group">
+        <label for="newPassword">密碼</label>
+        <input type="password" id="newPassword" name="password" placeholder="請輸入新密碼" required>
+      </div>
+      <button type="submit" class="btn-register">註冊</button>
+      <div class="error-message" id="error-message" style="display:none;"></div> <!-- 用於顯示錯誤訊息 -->
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('register-form').addEventListener('submit', function(event) {
+      event.preventDefault(); // 防止表單默認提交行為
+
+      // 獲取使用者輸入的帳號與密碼
+      const username = document.getElementById("newUsername").value;
+      const password = document.getElementById("newPassword").value;
+
+      // 發送註冊請求
+      fetch('http://localhost:3000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert("註冊成功，請登入"); // 註冊成功提示
+          window.location.href = "login.html"; // 跳轉回登入頁面
+        } else {
+          // 顯示錯誤訊息
+          const errorMessage = document.getElementById('error-message');
+          errorMessage.innerText = data.message; // 設置錯誤訊息
+          errorMessage.style.display = 'block'; // 顯示錯誤訊息
+        }
+      })
+      .catch(error => {
+        console.error("註冊發生錯誤：", error);
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.innerText = "伺服器錯誤，請稍後再試";
+        errorMessage.style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>
