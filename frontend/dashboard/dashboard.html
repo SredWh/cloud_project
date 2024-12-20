@@ -35,7 +35,7 @@
       }
 
       // 發送請求顯示代辦事項
-      fetch('http://localhost:3000/api/show_item', {
+      fetch('http://192.168.2.45:32000/api/show_item', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +90,7 @@
         return;
       }
 
-      fetch('http://localhost:3000/api/delete_item', {
+      fetch('http://192.168.2.45:32000/api/delete_item', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,7 +131,7 @@
         return;
       }
 
-      fetch('http://localhost:3000/api/add_item', {
+      fetch('http://192.168.2.45:32000/api/add_item', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

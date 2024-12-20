@@ -1,10 +1,12 @@
 const express = require('express');
+const multer = require('multer');
 const path = require('path');
 const cors = require('cors');  // 引入 cors 模組
 const session = require('express-session');
 const { login } = require('./login');
 const { add_item ,show_item,delete_item} = require('./todo');
 const { registerUser } = require('./register');
+const { add_pic ,show_pic,delete_pic} = require('./upload_pic');
 
 const app = express();
 const port = 3000;
@@ -132,6 +134,107 @@ app.post('/api/delete_item', async (req, res) => {
     res.json({ success: false, message: '伺服器錯誤，請稍後再試。' });
   }
 });
+// pic
+// 將 uploads 資料夾設為靜態資源目錄
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// 設置圖片存儲位置
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // 圖片將存儲在 uploads 資料夾
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
+  },
+});
+// 設置圖片上傳限制
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png/; // 允許的檔案格式
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('只允許上傳 JPEG 或 PNG 格式的圖片'));
+    }
+  },
+});
+
+// 路由
+app.post('/api/add_pic', upload.single('image'), (req, res) => {
+  const user_id = req.body.user_id;
+  const image_path = req.file ? req.file.path : null; // 獲取圖片的存儲路徑
+
+  if (!user_id || !image_path) {
+    return res.status(400).json({ success: false, message: '用戶 ID 或圖片缺失' });
+  }
+
+  // 將圖片資料存儲到資料庫
+  add_pic(image_path, user_id)
+    .then(() => {
+      res.json({ success: true, message: '圖片新增成功' });
+    })
+    .catch((err) => {
+      console.error('新增圖片失敗:', err);
+      res.status(500).json({ success: false, message: '伺服器錯誤，請稍後再試。' });
+    });
+});
+//顯示pic
+// API - 顯示圖片
+app.post('/api/show_pic', async (req, res) => {
+  const { user_id } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({ success: false, message: '請登入' });
+  }
+  try {
+    const user_images = await show_pic(user_id);
+    if (user_images) {
+      const baseUrl = req.protocol + '://' + req.get('host');
+      const imagesWithUrl = user_images.map(image => ({
+        ...image,
+        url: `${baseUrl}/${image.image_path}`,
+      }));
+
+      res.json({ success: true, images: imagesWithUrl });
+    } else {
+      res.json({ success: false, message: '沒有找到任何圖片' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false, message: '伺服器錯誤，請稍後再試。' });
+  }
+});
+
+app.post('/api/delete_pic', async (req, res) => {
+  const { imageId,user_id} = req.body;
+  console.log(imageId);
+  console.log(req.body);
+  if (!user_id || !imageId ) {
+    return res.status(400).json({ success: false, message: '請登入' });
+  }
+  try {
+    
+    const success = await delete_pic(user_id,imageId);
+   
+    if (success) {
+      
+      
+      res.json({ success: true  });
+    } else {
+      
+      res.json({ success: false, message: '刪除失敗' });
+    }
+  } catch (error) {
+    console.error(error);
+    console.log(error);
+    res.json({ success: false, message: '伺服器錯誤，請稍後再試。' });
+  }
+});
+
+
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

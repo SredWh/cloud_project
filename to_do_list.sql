@@ -57,6 +57,15 @@ CREATE TABLE `user_account` (
   `password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+CREATE TABLE image_uploads (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  image_path VARCHAR(255) NOT NULL,
+  user_id INT NOT NULL,
+  upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 --
 -- 傾印資料表的資料 `user_account`
 --
