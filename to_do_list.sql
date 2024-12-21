@@ -62,8 +62,7 @@ CREATE TABLE image_uploads (
   id INT AUTO_INCREMENT PRIMARY KEY,
   image_path VARCHAR(255) NOT NULL,
   user_id INT NOT NULL,
-  upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  upload_date DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 --
@@ -71,9 +70,7 @@ CREATE TABLE image_uploads (
 --
 
 INSERT INTO `user_account` (`user_id`, `account`, `password`) VALUES
-(1, 'test', 'test'),
-(6, 'test1', 'test1'),
-(7, 'test3', 'test3');
+(1, 'test', 'test');
 
 --
 -- 已傾印資料表的索引

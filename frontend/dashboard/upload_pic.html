@@ -10,6 +10,8 @@
 <body>
   <div class="logout-container">
     <button class="logout-btn" onclick="logout()">登出</button>
+    <p><a class="link-opacity-100" href="dashboard.html">To Do List</a></p>
+    <p><a class="link-opacity-100" href="upload_pic.html">圖片管理</a></p>
   </div>
   <div class="main">
     <div class="header">圖片管理</div>
@@ -38,7 +40,7 @@
       }
 
       // 發送請求顯示圖片列表
-      fetch('http://localhost:3000/api/show_pic', {
+      fetch('http://192.168.2.45:32000/api/show_pic', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +96,7 @@
         return;
       }
 
-      fetch('http://localhost:3000/api/delete_pic', {
+      fetch('http://192.168.2.45:32000/api/delete_pic', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +140,7 @@
       formData.append('image', file);
       formData.append('user_id', user_id);
 
-      fetch('http://localhost:3000/api/add_pic', {
+      fetch('http://192.168.2.45:32000/api/add_pic', {
         method: 'POST',
         body: formData,
         credentials: 'include'
